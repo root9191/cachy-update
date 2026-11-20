@@ -1,5 +1,13 @@
 # Cachy-Update (fork of [Arch-Update](https://github.com/Antiz96/arch-update))
 
+## Update Repo
+```bash
+scripts/sync-upstream.sh              # holen, mergen, bauen, installieren, pushen
+scripts/sync-upstream.sh --check      # nur nachsehen, ob es etwas Neues gibt
+scripts/sync-upstream.sh --no-install # ohne Build/Installation
+scripts/sync-upstream.sh --no-push    # ohne Push
+```
+
 <p align="center">
   <img width="460" height="300" src="https://github.com/user-attachments/assets/5782bd11-084a-4ca3-b599-1c322ee11b84">
 </p>
