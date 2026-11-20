@@ -51,6 +51,12 @@ else
 		echo
 
 		while true; do
+			if [ -n "${auto_mode}" ]; then
+				# Unattended mode: only list the news titles, don't read any article
+				answer_array=()
+				break
+			fi
+
 			if [ -n "${news_option}" ]; then
 				ask_msg_array "$(eval_gettext "Select the news to read (e.g. 1 3 5), select 0 to read them all or press \"enter\" to quit:")"
 			else

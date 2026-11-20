@@ -23,7 +23,8 @@ if [ -n "${services}" ]; then
 
 	while true; do
 		echo
-		ask_msg_array "$(eval_gettext "Select the service(s) to restart (e.g. 1 3 5), select 0 to restart them all or press \"enter\" to continue without restarting the service(s):")"
+		# Unattended mode: restart all services only if "AutoRestartServices" is set in the configuration file
+		ask_msg_array "$(eval_gettext "Select the service(s) to restart (e.g. 1 3 5), select 0 to restart them all or press \"enter\" to continue without restarting the service(s):")" "${auto_restart_services:+0}"
 		echo
 
 		invalid_input=""

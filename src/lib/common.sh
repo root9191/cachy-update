@@ -77,15 +77,29 @@ info_msg() {
 }
 
 # Definition of the ask_msg function: Display a message as an interactive question
+# In unattended mode (-a / --auto), the question is printed and answered automatically with the 2nd argument (default: "n")
 ask_msg() {
 	msg="${1}"
+	if [ -n "${auto_mode}" ]; then
+		# shellcheck disable=SC2034
+		answer="${2:-n}"
+		echo -e "${blue}->${color_off}${bold} ${msg}${color_off} [auto: ${answer}]"
+		return 0
+	fi
 	# shellcheck disable=SC2034
 	read -rp $"$(echo -e "${blue}->${color_off}${bold} ${msg}${color_off} ")" answer
 }
 
 # Definition of the ask_msg_array function: Display a message as an interactive question with multiple possible answers 
+# In unattended mode, the answer is the 2nd argument (default: empty, i.e. "press enter")
 ask_msg_array() {
 	msg="${1}"
+	if [ -n "${auto_mode}" ]; then
+		# shellcheck disable=SC2034
+		read -ra answer_array <<< "${2}"
+		echo -e "${blue}->${color_off}${bold} ${msg}${color_off} [auto: ${2:-enter}]"
+		return 0
+	fi
 	# shellcheck disable=SC2034
 	read -rp $"$(echo -e "${blue}->${color_off}${bold} ${msg}${color_off} ")" -a answer_array
 }
@@ -104,12 +118,14 @@ error_msg() {
 
 # Definition of the continue_msg function: Display the continue message
 continue_msg() {
+	[ -n "${auto_mode}" ] && return 0
 	msg="$(eval_gettext "Press \"enter\" to continue ")"
 	read -n 1 -r -s -p $"$(info_msg "${msg}")" && echo
 }
 
 # Definition of the quit_msg function: Display the quit message
 quit_msg() {
+	[ -n "${auto_mode}" ] && return 0
 	msg="$(eval_gettext "Press \"enter\" to quit ")"
 	read -n 1 -r -s -p $"$(info_msg "${msg}")" && echo
 }
@@ -158,6 +174,12 @@ fi
 if [ -z "${no_alhp_check}" ]; then
 	# shellcheck disable=SC2034
 	alhp_support=$(command -v alhp.utils)
+fi
+
+# Non-interactive flags used in unattended mode (-a / --auto)
+if [ -n "${auto_mode}" ]; then
+	pacman_auto_opt=("--noconfirm")
+	flatpak_auto_opt=("-y")
 fi
 
 # Definition of the elevation command to use (depending on which one is installed on the system and if it's not already defined in arch-update.conf)

@@ -10,6 +10,23 @@ _name="Arch-Update"
 version="4.4.7"
 option="${1}"
 
+# Unattended mode: "-a / --auto" can be given anywhere. It answers every question automatically
+# (no prompts, no "press enter") and can be combined with other options (e.g. "-a -d")
+for arg in "${@}"; do
+	case "${arg}" in
+		-a|--auto)
+			auto_mode="true"
+		;;
+	esac
+done
+
+# If "-a / --auto" is the first argument, use the next one (if any) as the actual option
+case "${option}" in
+	-a|--auto)
+		option="${2}"
+	;;
+esac
+
 # Define the directory containing libraries
 if [ -n "${ARCH_UPDATE_LIBDIR}" ]; then
 	libdir="${ARCH_UPDATE_LIBDIR}"

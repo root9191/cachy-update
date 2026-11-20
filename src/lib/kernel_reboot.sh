@@ -8,7 +8,8 @@ kernel_file="/usr/lib/modules/$(uname -r)/vmlinuz"
 
 if ! [ -f "${kernel_file}" ]; then
 	main_msg "$(eval_gettext "Reboot required:\nThere's a pending kernel update on your system requiring a reboot to be applied\n")"
-	ask_msg "$(eval_gettext "Would you like to reboot now? [y/N]")"
+	# Unattended mode: only reboot if "AutoReboot" is set in the configuration file
+	ask_msg "$(eval_gettext "Would you like to reboot now? [y/N]")" "${auto_reboot:+y}"
 
 	# shellcheck disable=SC2154
 	case "${answer}" in

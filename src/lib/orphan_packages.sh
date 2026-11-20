@@ -11,9 +11,9 @@ if [ "${#orphan_packages[@]}" -gt 0 ]; then
 	printf "%s\n" "${orphan_packages[@]}" ""
 
 	if [ "${#orphan_packages[@]}" -eq 1 ]; then
-		ask_msg "$(eval_gettext "Would you like to remove this orphan package (and its potential dependencies) now? [y/N]")"
+		ask_msg "$(eval_gettext "Would you like to remove this orphan package (and its potential dependencies) now? [y/N]")" "y"
 	else
-		ask_msg "$(eval_gettext "Would you like to remove these orphan packages (and their potential dependencies) now? [y/N]")"
+		ask_msg "$(eval_gettext "Would you like to remove these orphan packages (and their potential dependencies) now? [y/N]")" "y"
 	fi
 
 	# shellcheck disable=SC2154
@@ -23,7 +23,7 @@ if [ "${#orphan_packages[@]}" -gt 0 ]; then
 			main_msg "$(eval_gettext "Removing Orphan Packages...\n")"
 
 			# shellcheck disable=SC2154
-			if ! "${su_cmd}" pacman --color "${pacman_color_opt}" -Rns "${orphan_packages[@]}"; then
+			if ! "${su_cmd}" pacman --color "${pacman_color_opt}" "${pacman_auto_opt[@]}" -Rns "${orphan_packages[@]}"; then
 				echo
 				error_msg "$(eval_gettext "An error has occurred during the removal process\nThe removal has been aborted\n")"
 			else

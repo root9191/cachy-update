@@ -16,6 +16,8 @@
 #KeepOldPackages=3
 #KeepUninstalledPackages=0
 #DiffProg=$DIFFPROG
+#AutoReboot
+#AutoRestartServices
 #ShowTrayWhenRelevant
 #TrayUpdatesPerPage=0
 #TrayIconStyle=blue

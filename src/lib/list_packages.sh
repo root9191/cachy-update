@@ -159,7 +159,7 @@ else
 			# shellcheck source=src/lib/alhp_check.sh disable=SC2154
 			source "${libdir}/alhp_check.sh"
 		fi
-		ask_msg "$(eval_gettext "Proceed with update? [Y/n]")"
+		ask_msg "$(eval_gettext "Proceed with update? [Y/n]")" "y"
 
 		# shellcheck disable=SC2154
 		case "${answer}" in

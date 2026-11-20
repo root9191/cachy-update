@@ -66,6 +66,14 @@ if [ -f "${config_file}" ]; then
 	# shellcheck disable=SC2034
 	diff_prog=$(grep -E '^[[:space:]]*DiffProg[[:space:]]*=[[:space:]]*[^[:space:]].*[[:space:]]*$' "${config_file}" 2> /dev/null | awk -F '=' '{print $2}' | sed 's/^[[:space:]]*//;s/[[:space:]]*$//')
 
+	# Check the "AutoReboot" option in arch-update.conf (unattended mode only: reboot automatically if a kernel update is pending)
+	# shellcheck disable=SC2034
+	auto_reboot=$(grep -Eq '^[[:space:]]*AutoReboot[[:space:]]*$' "${config_file}" 2> /dev/null && echo "true")
+
+	# Check the "AutoRestartServices" option in arch-update.conf (unattended mode only: restart services requiring it automatically)
+	# shellcheck disable=SC2034
+	auto_restart_services=$(grep -Eq '^[[:space:]]*AutoRestartServices[[:space:]]*$' "${config_file}" 2> /dev/null && echo "true")
+
 	# Check the "ShowTrayWhenRelevant" option in arch-update.conf
 	# shellcheck disable=SC2034
 	show_tray_when_relevant=$(grep -Eq '^[[:space:]]*ShowTrayWhenRelevant[[:space:]]*$' "${config_file}" 2> /dev/null && echo "true")
