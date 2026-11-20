@@ -110,8 +110,8 @@ fi
 
 if [ -n "${do_install}" ]; then
 	msg "Baue und installiere (PREFIX=${PREFIX})..."
-	make build || { err "make build fehlgeschlagen"; exit 1; }
-	sudo make install PREFIX="${PREFIX}" || { err "make install fehlgeschlagen"; exit 1; }
+    make build WITH_TRAY=false || { err "make build fehlgeschlagen"; exit 1; }
+	sudo make install PREFIX="${PREFIX} WITH_TRAY=false || { err "make install fehlgeschlagen"; exit 1; }
 fi
 
 if [ -n "${do_push}" ]; then

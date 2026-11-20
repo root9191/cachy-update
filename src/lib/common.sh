@@ -82,7 +82,12 @@ ask_msg() {
 	msg="${1}"
 	if [ -n "${auto_mode}" ]; then
 		# shellcheck disable=SC2034
-		answer="${2:-n}"
+		# "y" is translated like the real prompts are (e.g. "j" in German), as the callers compare against the translated answer
+		if [ "${2}" == "y" ]; then
+			answer="$(eval_gettext "y")"
+		else
+			answer="n"
+		fi
 		echo -e "${blue}->${color_off}${bold} ${msg}${color_off} [auto: ${answer}]"
 		return 0
 	fi
