@@ -48,6 +48,21 @@ if ! git remote get-url upstream > /dev/null 2>&1; then
 	git remote add upstream "${UPSTREAM_URL}" || exit 1
 fi
 
+# Ein angefangener Merge (z.B. nach einem Konflikt) muss erst abgeschlossen werden
+if [ -f "$(git rev-parse --git-dir)/MERGE_HEAD" ]; then
+	err "Ein Merge ist noch nicht abgeschlossen."
+	unresolved=$(git ls-files -u | cut -f2 | sort -u)
+	if [ -n "${unresolved}" ]; then
+		echo "Noch ungeloeste Konflikte in:"
+		echo "${unresolved}"
+		echo "Loesen, dann: git add <dateien> && git commit --no-edit"
+	else
+		echo "Alle Konflikte sind geloest. Abschliessen mit: git commit --no-edit"
+	fi
+	echo "Oder abbrechen: git merge --abort"
+	exit 1
+fi
+
 # Saubere Arbeitskopie erforderlich
 if [ -n "$(git status --porcelain --untracked-files=no)" ]; then
 	err "Es gibt uncommittete Aenderungen. Bitte erst committen oder 'git stash' ausfuehren."
@@ -80,7 +95,7 @@ msg "Merge upstream/${upstream_branch} in ${current_branch}..."
 if ! git merge --no-edit "upstream/${upstream_branch}"; then
 	echo
 	err "Merge-Konflikt! Betroffene Dateien:"
-	git diff --name-only --diff-filter=U
+	git ls-files -u | cut -f2 | sort -u
 	echo
 	echo "Loesen: Dateien bearbeiten (Marker <<<<<<< / >>>>>>> entfernen), dann:"
 	echo "  git add <dateien> && git commit"
@@ -110,8 +125,8 @@ fi
 
 if [ -n "${do_install}" ]; then
 	msg "Baue und installiere (PREFIX=${PREFIX})..."
-    make build WITH_TRAY=false || { err "make build fehlgeschlagen"; exit 1; }
-	sudo make install PREFIX="${PREFIX} WITH_TRAY=false || { err "make install fehlgeschlagen"; exit 1; }
+	make build || { err "make build fehlgeschlagen"; exit 1; }
+	sudo make install PREFIX="${PREFIX}" || { err "make install fehlgeschlagen"; exit 1; }
 fi
 
 if [ -n "${do_push}" ]; then
