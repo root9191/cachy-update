@@ -13,6 +13,8 @@ set -u
 
 UPSTREAM_URL="${UPSTREAM_URL:-https://github.com/CachyOS/cachy-update.git}"
 PREFIX="${PREFIX:-/usr}"
+# Standardmaessig ohne Tray-Applet (mit "WITH_TRAY=true scripts/sync-upstream.sh" wird es mitgebaut)
+WITH_TRAY="${WITH_TRAY:-false}"
 
 do_install="true"
 do_push="true"
@@ -125,8 +127,14 @@ fi
 
 if [ -n "${do_install}" ]; then
 	msg "Baue und installiere (PREFIX=${PREFIX})..."
-	make build || { err "make build fehlgeschlagen"; exit 1; }
-	sudo make install PREFIX="${PREFIX}" || { err "make install fehlgeschlagen"; exit 1; }
+	make build WITH_TRAY="${WITH_TRAY}" || { err "make build fehlgeschlagen"; exit 1; }
+	sudo make install PREFIX="${PREFIX}" WITH_TRAY="${WITH_TRAY}" || { err "make install fehlgeschlagen"; exit 1; }
+
+	# Der Befehl "cachy-update" ist ein Symlink auf "arch-update" (so macht es auch das CachyOS-Paket)
+	if [ "$(readlink "${PREFIX}/bin/cachy-update" 2> /dev/null)" != "arch-update" ]; then
+		msg "Lege Symlink ${PREFIX}/bin/cachy-update an"
+		sudo ln -sf arch-update "${PREFIX}/bin/cachy-update" || { err "Symlink konnte nicht angelegt werden"; exit 1; }
+	fi
 fi
 
 if [ -n "${do_push}" ]; then
