@@ -8,6 +8,7 @@
 #   scripts/sync-upstream.sh --no-install  # ohne Build / Installation
 #   scripts/sync-upstream.sh --no-push     # ohne Push nach origin
 #   scripts/sync-upstream.sh --check       # nur anzeigen, ob es Neuerungen gibt
+#   scripts/sync-upstream.sh --force       # auch ohne Neuerungen neu bauen und installieren
 
 set -u
 
@@ -19,14 +20,16 @@ WITH_TRAY="${WITH_TRAY:-false}"
 do_install="true"
 do_push="true"
 check_only=""
+force=""
 
 for arg in "${@}"; do
 	case "${arg}" in
 		--no-install) do_install="" ;;
 		--no-push) do_push="" ;;
 		--check) check_only="true" ;;
+		--force|-f) force="true" ;;
 		-h|--help)
-			sed -n '3,11p' "${0}" | sed 's/^# \{0,1\}//'
+			sed -n '3,12p' "${0}" | sed 's/^# \{0,1\}//'
 			exit 0
 		;;
 		*)
@@ -84,17 +87,22 @@ new_commits=$(git rev-list --count "HEAD..upstream/${upstream_branch}")
 
 if [ "${new_commits}" -eq 0 ]; then
 	msg "Dein Fork ist bereits auf dem neuesten Stand (keine neuen Commits in upstream/${upstream_branch})."
-	exit 0
+	if [ -z "${force}" ] || [ -n "${check_only}" ]; then
+		exit 0
+	fi
+	msg "--force: Es wird trotzdem neu gebaut und installiert."
+else
+	msg "${new_commits} neue Commit(s) in upstream/${upstream_branch}:"
+	git log --oneline --no-decorate "HEAD..upstream/${upstream_branch}" | head -20
+	[ "${new_commits}" -gt 20 ] && echo "  ... und $((new_commits - 20)) weitere"
 fi
-
-msg "${new_commits} neue Commit(s) in upstream/${upstream_branch}:"
-git log --oneline --no-decorate "HEAD..upstream/${upstream_branch}" | head -20
-[ "${new_commits}" -gt 20 ] && echo "  ... und $((new_commits - 20)) weitere"
 
 [ -n "${check_only}" ] && exit 0
 
-msg "Merge upstream/${upstream_branch} in ${current_branch}..."
-if ! git merge --no-edit "upstream/${upstream_branch}"; then
+if [ "${new_commits}" -gt 0 ]; then
+	msg "Merge upstream/${upstream_branch} in ${current_branch}..."
+fi
+if [ "${new_commits}" -gt 0 ] && ! git merge --no-edit "upstream/${upstream_branch}"; then
 	echo
 	err "Merge-Konflikt! Betroffene Dateien:"
 	git ls-files -u | cut -f2 | sort -u
@@ -127,6 +135,11 @@ fi
 
 if [ -n "${do_install}" ]; then
 	msg "Baue und installiere (PREFIX=${PREFIX})..."
+	if [ -n "${force}" ]; then
+		msg "--force: Entferne alte Build-Ergebnisse (make clean)..."
+		make clean || { err "make clean fehlgeschlagen"; exit 1; }
+		rm -f doc/man/arch-update.1 doc/man/arch-update.conf.5 po/*.mo
+	fi
 	make build WITH_TRAY="${WITH_TRAY}" || { err "make build fehlgeschlagen"; exit 1; }
 	sudo make install PREFIX="${PREFIX}" WITH_TRAY="${WITH_TRAY}" || { err "make install fehlgeschlagen"; exit 1; }
 
