@@ -7,7 +7,7 @@
 # General variables
 name="arch-update"
 _name="Arch-Update"
-version="4.5.0"
+version="4.5.1"
 option="${1}"
 
 # Unattended mode: "-a / --auto" can be given anywhere. It answers every question automatically
